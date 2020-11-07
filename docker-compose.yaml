@@ -1,0 +1,12 @@
+version: "3"
+services:
+  qbittorrent-notify:
+    image: adevjoe/qbittorrent-notify:latest
+    container_name: qbittorrent-notify
+    environment:
+      - BOT_TOKEN=
+      - CHAT_ID=
+      - QBITTORRENT_HOST=
+      - QBITTORRENT_USERNAME=
+      - QBITTORRENT_PASSWORD=
+    restart: always
