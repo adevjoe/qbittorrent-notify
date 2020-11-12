@@ -1,9 +1,9 @@
 # qBittorrent notify
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/adevjoe/qbittorrent-notify/latest?style=for-the-badge)
-![Docker Pulls](https://img.shields.io/docker/pulls/adevjoe/qbittorrent-notify?label=qbittorrent-notify%20pulls&style=for-the-badge)
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/adevjoe/qbittorrent-notify?style=for-the-badge)
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/adevjoe/qbittorrent-notify?style=for-the-badge)
+[![Docker Pulls](https://img.shields.io/docker/pulls/adevjoe/qbittorrent-notify?label=qbittorrent-notify%20pulls&style=for-the-badge)](https://hub.docker.com/repository/docker/adevjoe/qbittorrent-notify)
+[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/adevjoe/qbittorrent-notify?style=for-the-badge)](https://hub.docker.com/repository/docker/adevjoe/qbittorrent-notify)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/adevjoe/qbittorrent-notify?style=for-the-badge)](https://hub.docker.com/repository/docker/adevjoe/qbittorrent-notify)
 
 qBittorrent notify when torrents complete
 
