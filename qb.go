@@ -92,7 +92,7 @@ const (
 func (t *Torrent) notified() bool {
 	s := strings.Split(t.Tags, ",")
 	for _, v := range s {
-		if v == TagNotified {
+		if strings.TrimSpace(v) == TagNotified {
 			return true
 		}
 	}
