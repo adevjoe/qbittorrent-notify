@@ -33,13 +33,11 @@ func initQB() {
 }
 
 func login() {
-	loginURL := fmt.Sprintf("%s/api/v2/auth/login?username=%s&password=%s", qBittorrentHost, qBittorrentUsername, qBittorrentPassword)
-	req, err := http.NewRequest("GET", loginURL, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	rsp, err := client.Do(req)
+	loginURL := fmt.Sprintf("%s/api/v2/auth/login", qBittorrentHost)
+	rsp, err := client.PostForm(loginURL, url.Values{
+		"username": {qBittorrentUsername},
+		"password": {qBittorrentPassword},
+	})
 	if err != nil {
 		log.Println(err)
 		return
@@ -61,6 +59,7 @@ func login() {
 	log.Println("login success")
 }
 
+// Torrent qb torrent
 type Torrent struct {
 	AddedOn       int64   `json:"added_on"`
 	Dlspeed       int64   `json:"dlspeed"`
@@ -86,6 +85,7 @@ type Torrent struct {
 }
 
 const (
+	// TagNotified tag notified
 	TagNotified = "Notified"
 )
 
