@@ -121,7 +121,7 @@ func getTorrents() (*[]Torrent, error) {
 		"filter": "completed",
 	}
 	result := new([]Torrent)
-	err := do("torrents", "info", params, result)
+	err := do(http.MethodGet, "torrents", "info", params, result)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func setTag(hash, tags string) error {
 		"hashes": hash,
 		"tags":   tags,
 	}
-	err := do("torrents", "addTags", params, nil)
+	err := do(http.MethodPost, "torrents", "addTags", params, nil)
 	if err != nil {
 		return err
 	}
@@ -145,15 +145,15 @@ func unsetTag(hash, tags string) error {
 		"hashes": hash,
 		"tags":   tags,
 	}
-	err := do("torrents", "removeTags", params, nil)
+	err := do(http.MethodPost, "torrents", "removeTags", params, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func do(apiName, methodName string, params map[string]string, result interface{}) error {
-	u, err := url.Parse(fmt.Sprintf("%s/api/v2/%s/%s?", qBittorrentHost, apiName, methodName))
+func do(method, apiName, apiMethodName string, params map[string]string, result interface{}) error {
+	u, err := url.Parse(fmt.Sprintf("%s/api/v2/%s/%s?", qBittorrentHost, apiName, apiMethodName))
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func do(apiName, methodName string, params map[string]string, result interface{}
 		q.Set(k, v)
 	}
 	u.RawQuery = q.Encode()
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest(method, u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func do(apiName, methodName string, params map[string]string, result interface{}
 		}
 	}
 	if rsp.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s/%s request fail, status code: %d", apiName, methodName, rsp.StatusCode)
+		return fmt.Errorf("%s/%s request fail, status code: %d", apiName, apiMethodName, rsp.StatusCode)
 	}
 	defer rsp.Body.Close()
 	body, err := ioutil.ReadAll(rsp.Body)
