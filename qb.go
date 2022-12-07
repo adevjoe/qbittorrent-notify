@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -121,7 +122,7 @@ func getTorrents() (*[]Torrent, error) {
 		"filter": "completed",
 	}
 	result := new([]Torrent)
-	err := do("torrents", "info", params, result)
+	err := get("torrents", "info", params, result)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func setTag(hash, tags string) error {
 		"hashes": hash,
 		"tags":   tags,
 	}
-	err := do("torrents", "addTags", params, nil)
+	err := postForm("torrents", "addTags", params, nil)
 	if err != nil {
 		return err
 	}
@@ -145,15 +146,15 @@ func unsetTag(hash, tags string) error {
 		"hashes": hash,
 		"tags":   tags,
 	}
-	err := do("torrents", "removeTags", params, nil)
+	err := postForm("torrents", "removeTags", params, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func do(apiName, methodName string, params map[string]string, result interface{}) error {
-	u, err := url.Parse(fmt.Sprintf("%s/api/v2/%s/%s?", qBittorrentHost, apiName, methodName))
+func get(apiName, apiMethodName string, params map[string]string, result interface{}) error {
+	u, err := url.Parse(fmt.Sprintf("%s/api/v2/%s/%s?", qBittorrentHost, apiName, apiMethodName))
 	if err != nil {
 		return err
 	}
@@ -162,7 +163,7 @@ func do(apiName, methodName string, params map[string]string, result interface{}
 		q.Set(k, v)
 	}
 	u.RawQuery = q.Encode()
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -181,7 +182,55 @@ func do(apiName, methodName string, params map[string]string, result interface{}
 		}
 	}
 	if rsp.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s/%s request fail, status code: %d", apiName, methodName, rsp.StatusCode)
+		return fmt.Errorf("%s/%s request fail, status code: %d", apiName, apiMethodName, rsp.StatusCode)
+	}
+	defer rsp.Body.Close()
+	body, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return err
+	}
+	if result == nil {
+		return nil
+	}
+	err = json.Unmarshal(body, result)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func postForm(apiName, apiMethodName string, params map[string]string, result interface{}) error {
+	u, err := url.Parse(fmt.Sprintf("%s/api/v2/%s/%s?", qBittorrentHost, apiName, apiMethodName))
+	if err != nil {
+		return err
+	}
+	values := url.Values{}
+	for k, v := range params {
+		values.Set(k, v)
+	}
+	data := values.Encode()
+	reqBody := bytes.NewReader([]byte(data))
+	req, err := http.NewRequest(http.MethodPost, u.String(), reqBody)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	if err != nil {
+		return err
+	}
+	var rsp *http.Response
+	rsp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	if rsp.StatusCode == http.StatusForbidden {
+		log.Println("session expired")
+		login()
+		// retry
+		rsp, err = client.Do(req)
+		if err != nil {
+			return err
+		}
+	}
+	if rsp.StatusCode != http.StatusOK {
+		return fmt.Errorf("%s/%s request fail, status code: %d", apiName, apiMethodName, rsp.StatusCode)
 	}
 	defer rsp.Body.Close()
 	body, err := ioutil.ReadAll(rsp.Body)
